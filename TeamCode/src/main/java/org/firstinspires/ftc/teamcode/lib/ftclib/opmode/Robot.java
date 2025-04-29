@@ -16,6 +16,8 @@ public class Robot {
         isDisabled = false;
     }
 
+    public static boolean isEnabled() {return !isDisabled();}
+
     public static boolean isDisabled() {
         return isDisabled;
     }

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 /**
  * An extended motor class that utilizes more features than the
@@ -104,6 +105,10 @@ public class MotorEx extends Motor {
      */
     public double getAcceleration() {
         return encoder.getAcceleration();
+    }
+
+    public double getCurrent() {
+        return motorEx.getCurrent(CurrentUnit.AMPS);
     }
 
     @Override

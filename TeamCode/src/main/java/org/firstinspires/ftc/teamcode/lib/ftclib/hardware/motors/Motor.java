@@ -321,6 +321,10 @@ public class Motor implements HardwareDevice {
         return encoder.getDistance();
     }
 
+    public double getRevolutions() {
+        return encoder.getRevolutions();
+    }
+
     /**
      * @return the rate of the encoder
      */

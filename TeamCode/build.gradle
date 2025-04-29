@@ -14,6 +14,8 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id "edu.wpi.first.GradleRIO" version "2025.1.1-beta-1"
     id 'edu.wpi.first.WpilibTools' version '1.3.0'
+
+    id "com.diffplug.spotless" version "6.12.0"
 }
 
 wpi.maven.useLocal = false
@@ -70,5 +72,46 @@ tasks.register('PullWPILibLibraries') {
     copy {
         from zipTree(f)
         into 'src/main/jniLibs/arm64-v8a'
+    }
+}
+
+// Spotless formatting
+spotless {
+    java {
+        target fileTree(".") {
+            include "**/*.java"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        toggleOffOn()
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    groovyGradle {
+        target fileTree(".") {
+            include "**/*.gradle"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        greclipse()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    json {
+        target fileTree(".") {
+            include "**/*.json"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        gson().indentWithSpaces(2)
+    }
+    format "misc", {
+        target fileTree(".") {
+            include "**/*.md", "**/.gitignore"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
     }
 }
