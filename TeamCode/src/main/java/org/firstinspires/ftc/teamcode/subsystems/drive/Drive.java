@@ -56,16 +56,16 @@ public class Drive extends SubsystemBase {
                 driveInputs.wheelPositions,
                 new Pose2d());
 
-        kP = new TunableNumber("Drive/kP");
-        kI = new TunableNumber("Drive/kI");
-        kD = new TunableNumber("Drive/kD");
+        kP = new TunableNumber("Drive/kP", 1);
+        kI = new TunableNumber("Drive/kI", 0);
+        kD = new TunableNumber("Drive/kD", 0);
 
-        kS = new TunableNumber("Drive/kS");
-        kV = new TunableNumber("Drive/kV");
-        kA = new TunableNumber("Drive/kA");
+        kS = new TunableNumber("Drive/kS", 1);
+        kV = new TunableNumber("Drive/kV", 1);
+        kA = new TunableNumber("Drive/kA", 0);
 
-        maxVelo = new TunableNumber("Drive/maxVelo");
-        maxAccel = new TunableNumber("Drive/maxAccel");
+        maxVelo = new TunableNumber("Drive/maxVelo", 1);
+        maxAccel = new TunableNumber("Drive/maxAccel", 1);
 
         timer = new Timer();
         timer.start();

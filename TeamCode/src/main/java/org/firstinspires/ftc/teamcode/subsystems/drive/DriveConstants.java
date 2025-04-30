@@ -8,8 +8,8 @@ public class DriveConstants {
 
     public record DriveGains(double kP, double kI, double kD, double kS, double kV, double kA) {}
 
-    public static double wheelBase = Units.inchesToMeters(10);
-    public static double trackWidth = Units.inchesToMeters(10);
+    public static double wheelBase = Units.inchesToMeters(7.68);
+    public static double trackWidth = Units.inchesToMeters(9.45);
 
     public static final Translation2d[] moduleTranslations =
             new Translation2d[] {
@@ -20,5 +20,5 @@ public class DriveConstants {
             };
 
     public static DriveGains driveGains = new DriveGains(0, 0, 0, 0, 0, 0);
-    public static DriveConfig driveConfig = new DriveConfig(1.0, Units.inchesToMeters(2.0));
+    public static DriveConfig driveConfig = new DriveConfig(19.0, (104.0 / 2.0) * 0.001);
 }

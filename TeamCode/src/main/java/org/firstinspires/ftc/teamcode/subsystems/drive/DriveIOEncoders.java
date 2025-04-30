@@ -75,6 +75,8 @@ public class DriveIOEncoders implements DriveIO {
         bRController.setPID(gains.kP(), gains.kI(), gains.kD());
 
         feedforward.setGains(gains.kS(), gains.kV(), gains.kA());
+
+        System.out.println("Changed Gains");
     }
 
     private MecanumDriveWheelPositions getPositions() {

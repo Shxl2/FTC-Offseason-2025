@@ -44,6 +44,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
@@ -83,7 +84,9 @@ import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.hardware.HardwareFactory;
 import com.qualcomm.robotcore.eventloop.EventLoopManager;
 import com.qualcomm.robotcore.eventloop.opmode.FtcRobotControllerServiceState;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.hardware.configuration.Utility;
 import com.qualcomm.robotcore.robot.Robot;
@@ -115,6 +118,7 @@ import org.firstinspires.ftc.robotcore.internal.network.WifiMuteEvent;
 import org.firstinspires.ftc.robotcore.internal.network.WifiMuteStateMachine;
 import org.firstinspires.ftc.robotcore.internal.opmode.ClassManager;
 import org.firstinspires.ftc.robotcore.internal.opmode.OnBotJavaHelper;
+import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
 import org.firstinspires.ftc.robotcore.internal.system.AppAliveNotifier;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.robotcore.internal.system.Assert;
@@ -135,7 +139,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @SuppressWarnings("WeakerAccess")
 public class FtcRobotControllerActivity extends Activity
-  {
+{
   public static final String TAG = "RCActivity";
   public String getTag() { return TAG; }
 
@@ -152,6 +156,9 @@ public class FtcRobotControllerActivity extends Activity
   protected UpdateUI.Callback callback;
   protected Context context;
   protected Utility utility;
+
+  protected Handler handler = new Handler();
+  protected Runnable runnable;
   protected StartResult prefRemoterStartResult = new StartResult();
   protected StartResult deviceNameStartResult = new StartResult();
   protected PreferencesHelper preferencesHelper;
@@ -332,7 +339,7 @@ public class FtcRobotControllerActivity extends Activity
         });
         popupMenu.inflate(R.menu.ftc_robot_controller);
         AnnotatedHooksClassFilter.getInstance().callOnCreateMenuMethods(
-            FtcRobotControllerActivity.this, popupMenu.getMenu());
+                FtcRobotControllerActivity.this, popupMenu.getMenu());
         popupMenu.show();
       }
     });
@@ -446,6 +453,17 @@ public class FtcRobotControllerActivity extends Activity
 
     // In case the user just got back from fixing their clock, refresh ClockWarningSource
     ClockWarningSource.getInstance().onPossibleRcClockUpdate();
+
+    handler.postDelayed(runnable = new Runnable() {
+      public void run() {
+        OpMode opMode = RegisteredOpModes.getInstance().getOpMode("InitNT");
+        if (opMode != null) {
+          opMode.init();
+        } else {
+          RobotLog.vv(TAG, "OpMode is null");
+        }
+      }
+    }, 10000);
   }
 
   @Override
@@ -578,7 +596,7 @@ public class FtcRobotControllerActivity extends Activity
       startActivityForResult(intentConfigure, RequestCode.CONFIGURE_ROBOT_CONTROLLER.ordinal());
     }
     else if (id == R.id.action_settings) {
-	  // historical: this once erroneously used FTC_CONFIGURE_REQUEST_CODE_ROBOT_CONTROLLER
+      // historical: this once erroneously used FTC_CONFIGURE_REQUEST_CODE_ROBOT_CONTROLLER
       Intent settingsIntent = new Intent(AppUtil.getDefContext(), FtcRobotControllerSettingsActivity.class);
       startActivityForResult(settingsIntent, RequestCode.SETTINGS_ROBOT_CONTROLLER.ordinal());
       return true;
@@ -614,7 +632,7 @@ public class FtcRobotControllerActivity extends Activity
       return true;
     }
 
-   return super.onOptionsItemSelected(item);
+    return super.onOptionsItemSelected(item);
   }
 
   @Override
@@ -692,7 +710,7 @@ public class FtcRobotControllerActivity extends Activity
     });
 
     AnnotatedHooksClassFilter.getInstance().callWebHandlerRegistrarMethods(this,
-        service.getWebServer().getWebHandlerManager());
+            service.getWebServer().getWebHandlerManager());
   }
 
   private void updateUIAndRequestRobotSetup() {
@@ -701,12 +719,12 @@ public class FtcRobotControllerActivity extends Activity
       callback.updateRobotStatus(controllerService.getRobotStatus());
       // Only show this first-time toast on headless systems: what we have now on non-headless suffices
       requestRobotSetup(LynxConstants.isRevControlHub()
-        ? new Runnable() {
-            @Override public void run() {
-              showRestartRobotCompleteToast(R.string.toastRobotSetupComplete);
-            }
-          }
-        : null);
+              ? new Runnable() {
+        @Override public void run() {
+          showRestartRobotCompleteToast(R.string.toastRobotSetupComplete);
+        }
+      }
+              : null);
     }
   }
 
@@ -758,8 +776,8 @@ public class FtcRobotControllerActivity extends Activity
     requestRobotSetup(new Runnable() {
       @Override public void run() {
         showRestartRobotCompleteToast(R.string.toastRestartRobotComplete);
-        }
-      });
+      }
+    });
   }
 
   private void showRestartRobotCompleteToast(@StringRes int resid) {

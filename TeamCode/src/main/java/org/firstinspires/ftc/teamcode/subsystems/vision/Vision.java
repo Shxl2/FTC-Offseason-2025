@@ -42,7 +42,7 @@ public class Vision extends SubsystemBase {
     @Override
     public void periodic() {
        io.updateInputs(inputs);
-       // inputs.logValues("Vision")
+       inputs.logValues("Vision");
 
         // Initialize logging values
         Pose3d robotPose;

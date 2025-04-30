@@ -15,9 +15,10 @@ package org.firstinspires.ftc.teamcode.lib.mecanical_advantage;
 
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Manages a number value published to the root table of NT. */
-public class NetworkNumber {
+public class NetworkNumber extends SubsystemBase {
     private final String key;
     private final DoubleEntry entry;
     private double defaultValue = 0.0;
@@ -67,5 +68,10 @@ public class NetworkNumber {
     /** Returns the current value. */
     public double get() {
         return value;
+    }
+
+    @Override
+    public void periodic() {
+        value = entry.get(defaultValue);
     }
 }
