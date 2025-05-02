@@ -9,7 +9,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class InitNT extends OpMode {
     @Override
     public void init() {
-        NetworkTableInstance.getDefault().startServer();
+//        NetworkTableInstance.getDefault().startServer();
     }
 
     @Override

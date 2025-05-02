@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.lib.ftclib.opmode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -8,10 +10,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public abstract class TimedRobotOpMode extends OpMode {
     @Override
     public final void init() {
-        NetworkTableInstance.getDefault().startServer();
-
-        NetworkTableInstance.getDefault().getEntry("topic").setBoolean(true);
-
         Robot.disable();
         robotInit();
     }
