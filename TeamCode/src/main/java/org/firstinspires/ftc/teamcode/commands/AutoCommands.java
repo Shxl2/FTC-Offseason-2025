@@ -32,6 +32,6 @@ public class AutoCommands {
     }
 
     public static Command followPath(Drive drive, PathChain chain) {
-        return Commands.runOnce(() -> drive.followPath(chain), drive).until(drive::isFinished);
+        return Commands.run(() -> drive.followPath(chain), drive);
     }
 }

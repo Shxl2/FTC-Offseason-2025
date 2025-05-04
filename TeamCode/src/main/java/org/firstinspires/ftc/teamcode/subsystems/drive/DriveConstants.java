@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.subsystems.drive;
 
 import com.pedropathing.follower.FollowerConstants;
+import com.pedropathing.localization.GoBildaPinpointDriver;
 import com.pedropathing.localization.Localizers;
 import com.pedropathing.localization.constants.OTOSConstants;
+import com.pedropathing.localization.constants.PinpointConstants;
+import com.pedropathing.localization.localizers.PinpointLocalizer;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
@@ -12,8 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class DriveConstants {
     public class FConstants {
         static {
-            FollowerConstants.localizers = Localizers.OTOS;
-
+            FollowerConstants.localizers = Localizers.PINPOINT;
             FollowerConstants.leftFrontMotorName = "FL";
             FollowerConstants.leftRearMotorName = "BL";
             FollowerConstants.rightFrontMotorName = "FR";
@@ -57,12 +59,17 @@ public class DriveConstants {
 
     public class LConstants {
         static {
-            OTOSConstants.linearUnit = DistanceUnit.INCH;
-            OTOSConstants.angleUnit = AngleUnit.RADIANS;
-            OTOSConstants.offset = new SparkFunOTOS.Pose2D((double)0.0F, (double)0.0F, (Math.PI / 2D));
-            OTOSConstants.linearScalar = (double)1.0F;
-            OTOSConstants.angularScalar = (double)1.0F;
-            OTOSConstants.hardwareMapName = "sensor_otos";
+            PinpointConstants.forwardY = -1.259;
+            PinpointConstants.strafeX = 0.0;
+            PinpointConstants.distanceUnit = DistanceUnit.INCH;
+            PinpointConstants.hardwareMapName = "pinpoint";
+            PinpointConstants.useYawScalar = false;
+            PinpointConstants.yawScalar = (double)1.0F;
+            PinpointConstants.useCustomEncoderResolution = false;
+            PinpointConstants.encoderResolution = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
+            PinpointConstants.customEncoderResolution = 13.26291192;
+            PinpointConstants.forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
+            PinpointConstants.strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
         }
     }
 

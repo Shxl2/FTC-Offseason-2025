@@ -22,18 +22,16 @@ public class Drive extends SubsystemBase {
     public Drive(HardwareMap hwMap, Telemetry telemetry) {
         drive = new Follower(hwMap, DriveConstants.FConstants.class, DriveConstants.LConstants.class);
 
-        drive.initialize(new LimelightLocalizerOTOS(hwMap));
+//        drive.initialize(new LimelightLocalizerOTOS(hwMap));
         this.telemetry = telemetry;
     }
 
     @Override
     public void periodic() {
-
         try {
             drive.update();
             drive.drawOnDashBoard();
             drive.telemetryDebug(telemetry);
-
         } catch (Exception ignored) {
         }
     }

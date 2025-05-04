@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.commands.AutoCommands;
 import org.firstinspires.ftc.teamcode.commands.DriveCommands;
 import org.firstinspires.ftc.teamcode.lib.wpilib.CommandGamepad;
 import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
@@ -26,6 +27,8 @@ public class RobotContainer {
         if (autoNum == 0) {
             setDefaultCommands();
             configureButtonBindings();
+        } else {
+            getAutoCommand(autoNum);
         }
     }
 
@@ -41,15 +44,11 @@ public class RobotContainer {
     public void configureButtonBindings() {
     }
 
-    public Command getAutoCommand(int chooser) {
+    public void getAutoCommand(int chooser) {
         switch (chooser) {
             case 1:
-                return null;
-            case 2:
-                return null;
-            case 3:
-                return null;
+                drive.setDefaultCommand(AutoCommands.followPath(drive, AutoCommands.sampleAutoPath(drive)));
+                break;
         }
-        return null;
     }
 }
