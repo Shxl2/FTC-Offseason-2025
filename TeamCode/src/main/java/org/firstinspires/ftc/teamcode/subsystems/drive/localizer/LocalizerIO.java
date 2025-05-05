@@ -12,6 +12,9 @@ public interface LocalizerIO {
         public double accelY = 0.0;
         public double accelZ = 0.0;
 
+        public LocalizerIOInputs() {
+
+        }
         public void logValues(String name) {
             NetworkTable table = NetworkTableInstance.getDefault().getTable(name);
             table.getStructTopic("Pose", Pose2d.struct).publish().set(pose);

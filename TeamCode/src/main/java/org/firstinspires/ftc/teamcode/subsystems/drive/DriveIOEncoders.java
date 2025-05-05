@@ -10,7 +10,7 @@ import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 
 public class DriveIOEncoders implements DriveIO {
-    double rotationsToMeters;
+    double ticksToMeters;
 
     private final MotorEx fL;
     private final MotorEx fR;
@@ -24,13 +24,18 @@ public class DriveIOEncoders implements DriveIO {
     private final PIDController bLController;
     private final PIDController bRController;
 
+    private MecanumDriveWheelSpeeds desiredSpeeds = new MecanumDriveWheelSpeeds();
+
     public DriveIOEncoders(HardwareMap hwMap, DriveConstants.DriveConfig config) {
-        rotationsToMeters = (config.wheelRadius() * 2 * Math.PI) / config.gearRatio();
+        ticksToMeters = (config.wheelRadius() * 2 * Math.PI) / (config.gearRatio() * 28.0);
 
         fL = new MotorEx(hwMap, "FL");
         fR = new MotorEx(hwMap, "FR");
         bL = new MotorEx(hwMap, "BL");
         bR = new MotorEx(hwMap, "BR");
+
+        fL.setInverted(true);
+        bL.setInverted(true);
 
         feedforward = new TunableSimpleMotorFeedforward(0, 0, 0);
 
@@ -43,6 +48,7 @@ public class DriveIOEncoders implements DriveIO {
     @Override
     public void updateInputs(DriveIOInputs inputs) {
         inputs.wheelPositions = getPositions();
+        inputs.desiredWheelSpeeds = desiredSpeeds;
         inputs.wheelSpeeds = getSpeeds();
 
         inputs.motorVoltages = new double[] {fL.getVoltage(), fR.getVoltage(), bL.getVoltage(), bR.getVoltage()};
@@ -51,6 +57,8 @@ public class DriveIOEncoders implements DriveIO {
 
     @Override
     public void setSpeeds(MecanumDriveWheelSpeeds speeds) {
+        desiredSpeeds = speeds;
+
         double fLFeedback = fLController.calculate(getSpeeds().frontLeftMetersPerSecond, speeds.frontLeftMetersPerSecond);
         double fRFeedback = fRController.calculate(getSpeeds().frontRightMetersPerSecond, speeds.frontRightMetersPerSecond);
         double bLFeedback = bLController.calculate(getSpeeds().rearLeftMetersPerSecond, speeds.rearLeftMetersPerSecond);
@@ -59,7 +67,7 @@ public class DriveIOEncoders implements DriveIO {
         double fLFF = feedforward.calculateWithVelocities(getSpeeds().frontLeftMetersPerSecond, speeds.frontLeftMetersPerSecond);
         double fRFF = feedforward.calculateWithVelocities(getSpeeds().frontRightMetersPerSecond, speeds.frontRightMetersPerSecond);
         double bLFF = feedforward.calculateWithVelocities(getSpeeds().rearLeftMetersPerSecond, speeds.rearLeftMetersPerSecond);
-        double bRFF = feedforward.calculateWithVelocities(getSpeeds().rearRightMetersPerSecond, speeds.rearLeftMetersPerSecond);
+        double bRFF = feedforward.calculateWithVelocities(getSpeeds().rearRightMetersPerSecond, speeds.rearRightMetersPerSecond);
 
         fL.setVoltage(fLFeedback + fLFF);
         fR.setVoltage(fRFeedback + fRFF);
@@ -81,13 +89,13 @@ public class DriveIOEncoders implements DriveIO {
 
     private MecanumDriveWheelPositions getPositions() {
         return new MecanumDriveWheelPositions(
-                fL.getRevolutions() * rotationsToMeters,
-                fR.getRevolutions() * rotationsToMeters,
-                bL.getRevolutions() * rotationsToMeters,
-                bR.getRevolutions() * rotationsToMeters);
+                fL.getDistance() * ticksToMeters,
+                fR.getDistance() * ticksToMeters,
+                bL.getDistance() * ticksToMeters,
+                bR.getDistance() * ticksToMeters);
     }
 
     private MecanumDriveWheelSpeeds getSpeeds() {
-        return new MecanumDriveWheelSpeeds(fL.getVelocity(), fR.getVelocity(), bL.getVelocity(), bR.getVelocity());
+        return new MecanumDriveWheelSpeeds(fL.getVelocity() * ticksToMeters, fR.getVelocity() * ticksToMeters, bL.getVelocity() * ticksToMeters, bR.getVelocity() * ticksToMeters);
     }
 }

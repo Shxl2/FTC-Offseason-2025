@@ -17,6 +17,7 @@ public abstract class TimedRobotOpMode extends OpMode {
     }
     @Override
     public final void init_loop() {
+        NetworkTableInstance.getDefault().getEntry("connected").setBoolean(NetworkTableInstance.getDefault().isConnected());
         robotPeriodic();
     }
 
@@ -34,6 +35,7 @@ public abstract class TimedRobotOpMode extends OpMode {
 
     @Override
     public final void stop() {
+        NetworkTableInstance.getDefault().close();
         disabledInit();
     }
 

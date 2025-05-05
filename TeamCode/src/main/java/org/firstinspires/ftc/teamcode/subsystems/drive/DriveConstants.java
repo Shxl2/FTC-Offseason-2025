@@ -19,6 +19,6 @@ public class DriveConstants {
                     new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
             };
 
-    public static DriveGains driveGains = new DriveGains(0, 0, 0, 0, 0, 0);
+    public static DriveGains driveGains = new DriveGains(0.5, 0, 0, 0.35, 6.4, 0);
     public static DriveConfig driveConfig = new DriveConfig(19.0, (104.0 / 2.0) * 0.001);
 }

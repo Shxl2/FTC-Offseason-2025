@@ -9,8 +9,8 @@
 
 <!--            <goBILDA5202SeriesMotor name="extension" port="0"/>&ndash;&gt;-->
 <!--            <goBILDA5202SeriesMotor name="intake" port="1"/>&ndash;&gt;-->
-            <goBILDA5202SeriesMotor name="FL" port="2"/>-->
-            <goBILDA5202SeriesMotor name="BL" port="3"/>-->
+            <goBILDA5202SeriesMotor name="FL" port="0"/>-->
+            <goBILDA5202SeriesMotor name="BL" port="1"/>-->
 
             <ControlHubImuBHI260AP name="imu" port="0" bus="0"/>
 
@@ -19,10 +19,10 @@
 
 <!--            <goBILDA5202SeriesMotor name="liftTop" port="0"/>-->
 <!--            <goBILDA5202SeriesMotor name="liftBottom" port="1"/>-->
-            <goBILDA5202SeriesMotor name="FR" port="2"/>
-            <goBILDA5202SeriesMotor name="BR" port="3"/>
+            <goBILDA5202SeriesMotor name="FR" port="1"/>
+            <goBILDA5202SeriesMotor name="BR" port="0"/>
 
-            <SparkFunOTOS name="sensor_otos" port="3" bus="3"/>
+<!--            <SparkFunOTOS name="sensor_otos" port="3" bus="3"/>-->
 <!--            <RevColorSensorV3 name="sensor_color" port="1" bus="1"/>-->
 
 <!--            <Servo name="rightDepositPivot" port="1"/>-->
