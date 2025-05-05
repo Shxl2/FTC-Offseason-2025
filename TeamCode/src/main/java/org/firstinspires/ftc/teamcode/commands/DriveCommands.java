@@ -125,4 +125,8 @@ public class DriveCommands {
                 // Reset PID controller when command starts
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
+
+    public static Command driveToPose(Drive drive, Pose2d pose) {
+        return new DriveToPose(drive, () -> pose);
+    }
 }

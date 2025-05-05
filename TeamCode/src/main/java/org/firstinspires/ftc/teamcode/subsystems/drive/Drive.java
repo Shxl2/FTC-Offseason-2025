@@ -1,16 +1,27 @@
 package org.firstinspires.ftc.teamcode.subsystems.drive;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.teamcode.lib.mecanical_advantage.TunableNumber;
+import org.firstinspires.ftc.teamcode.lib.pathplanner.AdvancedPPHolonomicDriveController;
 import org.firstinspires.ftc.teamcode.lib.wpilib.MecanumDrivePoseEstimator;
 import org.firstinspires.ftc.teamcode.subsystems.drive.localizer.LocalizerIO;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -41,9 +52,10 @@ public class Drive extends SubsystemBase {
     private final NetworkTable driveTable = NetworkTableInstance.getDefault().getTable("Drive");
     private final StructPublisher<Pose2d> poseTable = driveTable.getStructTopic("Pose", Pose2d.struct).publish();
     private final StructPublisher<ChassisSpeeds> desiredSpeedsTable = driveTable.getStructTopic("DesiredSpeeds", ChassisSpeeds.struct).publish();
+    private final StructPublisher<ChassisSpeeds> actualSpeedsTable = driveTable.getStructTopic("ActualSpeeds", ChassisSpeeds.struct).publish();
     private final Timer timer;
 
-    public Drive(DriveIO driveIO, LocalizerIO localizerIO, DriveConstants.DriveGains gains) {
+    public Drive(HardwareMap hwMap, DriveIO driveIO, LocalizerIO localizerIO, DriveConstants.DriveGains gains) {
         driveMotors = driveIO;
         localizer = localizerIO;
 
@@ -74,6 +86,33 @@ public class Drive extends SubsystemBase {
         timer.start();
 
         driveIO.setGains(gains);
+
+        RobotConfig config = RobotConfig.fromGUISettings(hwMap);
+
+        AutoBuilder.configure(
+                this::getPose,
+                this::setPose,
+                this::getSpeeds,
+                this::setSpeeds,
+                new AdvancedPPHolonomicDriveController(
+                        new PIDConstants(DriveConstants.TRANSLATION_P, DriveConstants.TRANSLATION_I, DriveConstants.TRANSLATION_D),
+                        new PIDConstants(DriveConstants.HEADING_P, DriveConstants.HEADING_I, DriveConstants.HEADING_D)
+                ),
+                new RobotConfig(1, 1, new ModuleConfig(0.1, 2, 0.5, DCMotor.getCIM(1), 20, 1), DriveConstants.moduleTranslations),
+                () -> {
+//                        // Boolean supplier that controls when the path will be mirrored for the red alliance
+//                        // This will flip the path being followed to the red side of the field.
+//                        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+//
+//                        var alliance = DriverStation.getAlliance();
+//                        if (alliance.isPresent()) {
+//                            return alliance.get() == DriverStation.Alliance.Red;
+//                        }
+//                        return false;
+                    return false;
+                },
+                this
+        );
     }
 
     @Override
@@ -88,6 +127,9 @@ public class Drive extends SubsystemBase {
 
         poseTable.set(getPose());
 
+        System.out.println(timer.get());
+
+        actualSpeedsTable.set(getSpeeds());
         TunableNumber.ifChanged(
                 hashCode(),
                 (values) -> {
@@ -107,12 +149,21 @@ public class Drive extends SubsystemBase {
         driveMotors.setSpeeds(kinematics.toWheelSpeeds(speeds));
     }
 
+    public ChassisSpeeds getSpeeds() {
+        return kinematics.toChassisSpeeds(driveInputs.wheelSpeeds);
+    }
+
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
+    public void setPose(Pose2d pose) {
+        localizer.resetPose(pose);
+        poseEstimator.resetPosition(localizerInputs.pose.getRotation(), new MecanumDriveWheelPositions(), pose);
+    }
+
     public Rotation2d getRotation() {
-        return poseEstimator.getEstimatedPosition().getRotation();
+        return getPose().getRotation();
     }
 
     public double getMaxVelocity() {

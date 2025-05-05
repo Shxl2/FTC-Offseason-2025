@@ -3,7 +3,12 @@ package com.pathplanner.lib.trajectory;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.events.*;
+import com.pathplanner.lib.events.CancelCommandEvent;
+import com.pathplanner.lib.events.Event;
+import com.pathplanner.lib.events.OneShotTriggerEvent;
+import com.pathplanner.lib.events.PointTowardsZoneEvent;
+import com.pathplanner.lib.events.ScheduleCommandEvent;
+import com.pathplanner.lib.events.TriggerEvent;
 import com.pathplanner.lib.path.EventMarker;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPoint;
@@ -373,9 +378,7 @@ public class PathPlannerTrajectory {
         accelVec = accelVec.times(maxAccel / accel);
       }
 
-      ChassisSpeeds chassisAccel =
-          new ChassisSpeeds(accelVec.getX(), accelVec.getY(), angularAccel);
-      ChassisSpeeds.fromFieldRelativeSpeeds(chassisAccel, state.pose.getRotation());
+      ChassisSpeeds chassisAccel = ChassisSpeeds.fromFieldRelativeSpeeds(accelVec.getX(), accelVec.getY(), angularAccel, state.pose.getRotation());
       var accelStates = config.toSwerveModuleStates(chassisAccel);
       for (int m = 0; m < config.numModules; m++) {
         double moduleAcceleration = accelStates[m].speedMetersPerSecond;
@@ -453,7 +456,7 @@ public class PathPlannerTrajectory {
           maxChassisAngVel);
 
       state.fieldSpeeds = config.toChassisSpeeds(state.moduleStates);
-      ChassisSpeeds.fromRobotRelativeSpeeds(state.fieldSpeeds, state.pose.getRotation());
+      state.fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(state.fieldSpeeds, state.pose.getRotation());
       state.linearVelocity =
           Math.hypot(state.fieldSpeeds.vxMetersPerSecond, state.fieldSpeeds.vyMetersPerSecond);
     }
@@ -515,8 +518,7 @@ public class PathPlannerTrajectory {
       }
 
       ChassisSpeeds chassisAccel =
-          new ChassisSpeeds(accelVec.getX(), accelVec.getY(), angularAccel);
-      ChassisSpeeds.fromFieldRelativeSpeeds(chassisAccel, state.pose.getRotation());
+          ChassisSpeeds.fromFieldRelativeSpeeds(accelVec.getX(), accelVec.getY(), angularAccel, state.pose.getRotation());
       var accelStates = config.toSwerveModuleStates(chassisAccel);
       for (int m = 0; m < config.numModules; m++) {
         double moduleAcceleration = accelStates[m].speedMetersPerSecond;
@@ -584,7 +586,7 @@ public class PathPlannerTrajectory {
           maxChassisAngVel);
 
       state.fieldSpeeds = config.toChassisSpeeds(state.moduleStates);
-      ChassisSpeeds.fromRobotRelativeSpeeds(state.fieldSpeeds, state.pose.getRotation());
+      state.fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(state.fieldSpeeds, state.pose.getRotation());
       state.linearVelocity =
           Math.hypot(state.fieldSpeeds.vxMetersPerSecond, state.fieldSpeeds.vyMetersPerSecond);
     }
@@ -779,9 +781,8 @@ public class PathPlannerTrajectory {
   private static ChassisSpeeds fromRobotRelativeSpeeds(
       ChassisSpeeds speeds, Rotation2d robotRotation) {
     ChassisSpeeds ret =
-        new ChassisSpeeds(
-            speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
-    ChassisSpeeds.fromRobotRelativeSpeeds(ret, robotRotation);
+        ChassisSpeeds.fromRobotRelativeSpeeds(
+            speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, robotRotation);
     return ret;
   }
 
@@ -789,9 +790,8 @@ public class PathPlannerTrajectory {
   private static ChassisSpeeds fromFieldRelativeSpeeds(
       ChassisSpeeds speeds, Rotation2d robotRotation) {
     ChassisSpeeds ret =
-        new ChassisSpeeds(
-            speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
-    ChassisSpeeds.fromFieldRelativeSpeeds(ret, robotRotation);
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, robotRotation);
     return ret;
   }
 }

@@ -1,22 +1,32 @@
-package com.pathplanner.lib.controllers;
+package org.firstinspires.ftc.teamcode.lib.pathplanner;
 
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 
-import java.util.Optional;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
+import org.firstinspires.ftc.teamcode.lib.mecanical_advantage.TunableNumber;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import java.util.Optional;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 /** Path following controller for holonomic drive trains */
-public class PPHolonomicDriveController implements PathFollowingController {
+public class AdvancedPPHolonomicDriveController implements PathFollowingController {
   private final PIDController xController;
   private final PIDController yController;
   private final PIDController rotationController;
+
+  private final TunableNumber translationalP;
+  private final TunableNumber translationalI;
+  private final TunableNumber translationalD;
+
+  private final TunableNumber rotationalP;
+  private final TunableNumber rotationalI;
+  private final TunableNumber rotationalD;
 
   private boolean isEnabled = true;
 
@@ -25,6 +35,13 @@ public class PPHolonomicDriveController implements PathFollowingController {
   private static DoubleSupplier yFeedbackOverride = null;
   private static DoubleSupplier rotFeedbackOverride = null;
 
+  private static DoubleSupplier xFeedbackOverrideRobotRelative = null;
+  private static DoubleSupplier yFeedbackOverrideRobotRelative = null;
+
+  private static DoubleSupplier xSetpointIncrement = () -> 0.0;
+  private static DoubleSupplier ySetpointIncrement = () -> 0.0;
+  private static DoubleSupplier rotSetpointIncrement = () -> 0.0;
+
   /**
    * Constructs a HolonomicDriveController
    *
@@ -32,8 +49,17 @@ public class PPHolonomicDriveController implements PathFollowingController {
    * @param rotationConstants PID constants for the rotation controller
    * @param period Period of the control loop in seconds
    */
-  public PPHolonomicDriveController(
+  public AdvancedPPHolonomicDriveController(
       PIDConstants translationConstants, PIDConstants rotationConstants, double period) {
+
+    translationalP = new TunableNumber("Pathplanner/TranslationalP", translationConstants.kP);
+    translationalI = new TunableNumber("Pathplanner/TranslationalI", translationConstants.kI);
+    translationalD = new TunableNumber("Pathplanner/TranslationalD", translationConstants.kD);
+
+    rotationalP = new TunableNumber("Pathplanner/RotationalP", rotationConstants.kP);
+    rotationalI = new TunableNumber("Pathplanner/RotationalI", rotationConstants.kI);
+    rotationalD = new TunableNumber("Pathplanner/RotationalD", rotationConstants.kD);
+
     this.xController =
         new PIDController(
             translationConstants.kP, translationConstants.kI, translationConstants.kD, period);
@@ -57,7 +83,7 @@ public class PPHolonomicDriveController implements PathFollowingController {
    * @param translationConstants PID constants for the translation PID controllers
    * @param rotationConstants PID constants for the rotation controller
    */
-  public PPHolonomicDriveController(
+  public AdvancedPPHolonomicDriveController(
       PIDConstants translationConstants, PIDConstants rotationConstants) {
     this(translationConstants, rotationConstants, 0.02);
   }
@@ -99,12 +125,15 @@ public class PPHolonomicDriveController implements PathFollowingController {
     double yFF = targetState.fieldSpeeds.vyMetersPerSecond;
 
     if (!this.isEnabled) {
-      ChassisSpeeds ret = ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, 0, currentPose.getRotation());
-      return ret;
+      return ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, 0, currentPose.getRotation());
     }
 
-    double xFeedback = this.xController.calculate(currentPose.getX(), targetState.pose.getX());
-    double yFeedback = this.yController.calculate(currentPose.getY(), targetState.pose.getY());
+    double xFeedback =
+        this.xController.calculate(
+            currentPose.getX(), targetState.pose.getX() + xSetpointIncrement.getAsDouble());
+    double yFeedback =
+        this.yController.calculate(
+            currentPose.getY(), targetState.pose.getY() + ySetpointIncrement.getAsDouble());
 
     Rotation2d targetRotation = targetState.pose.getRotation();
     if (rotationTargetOverride != null) {
@@ -113,7 +142,8 @@ public class PPHolonomicDriveController implements PathFollowingController {
 
     double rotationFeedback =
         rotationController.calculate(
-            currentPose.getRotation().getRadians(), targetRotation.getRadians());
+            currentPose.getRotation().getRadians(),
+            targetRotation.getRadians() + rotSetpointIncrement.getAsDouble());
     double rotationFF = targetState.fieldSpeeds.omegaRadiansPerSecond;
 
     if (xFeedbackOverride != null) {
@@ -126,9 +156,36 @@ public class PPHolonomicDriveController implements PathFollowingController {
       rotationFeedback = rotFeedbackOverride.getAsDouble();
     }
 
-    ChassisSpeeds ret =
-        ChassisSpeeds.fromFieldRelativeSpeeds(xFF + xFeedback, yFF + yFeedback, rotationFF + rotationFeedback, currentPose.getRotation());
-    return ret;
+    ChassisSpeeds speeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            xFF + xFeedback,
+            yFF + yFeedback,
+            rotationFF + rotationFeedback,
+            currentPose.getRotation());
+
+    if (xFeedbackOverrideRobotRelative != null) {
+      speeds.vxMetersPerSecond = xFeedbackOverrideRobotRelative.getAsDouble();
+    }
+    if (yFeedbackOverrideRobotRelative != null) {
+      speeds.vyMetersPerSecond = yFeedbackOverrideRobotRelative.getAsDouble();
+    }
+
+    TunableNumber.ifChanged(
+        hashCode(),
+        (values) -> {
+          xController.setPID(values[0], values[1], values[2]);
+          yController.setPID(values[0], values[1], values[2]);
+
+          rotationController.setPID(values[3], values[4], values[5]);
+        },
+        translationalP,
+        translationalI,
+        translationalD,
+        rotationalP,
+        rotationalI,
+        rotationalD);
+
+    return speeds;
   }
 
   /**
@@ -153,7 +210,7 @@ public class PPHolonomicDriveController implements PathFollowingController {
   @Deprecated
   public static void setRotationTargetOverride(
       Supplier<Optional<Rotation2d>> rotationTargetOverride) {
-    PPHolonomicDriveController.rotationTargetOverride = rotationTargetOverride;
+    AdvancedPPHolonomicDriveController.rotationTargetOverride = rotationTargetOverride;
   }
 
   /**
@@ -163,7 +220,7 @@ public class PPHolonomicDriveController implements PathFollowingController {
    *     meters/sec
    */
   public static void overrideXFeedback(DoubleSupplier xFeedbackOverride) {
-    PPHolonomicDriveController.xFeedbackOverride = xFeedbackOverride;
+    AdvancedPPHolonomicDriveController.xFeedbackOverride = xFeedbackOverride;
   }
 
   /**
@@ -171,7 +228,7 @@ public class PPHolonomicDriveController implements PathFollowingController {
    * error.
    */
   public static void clearXFeedbackOverride() {
-    PPHolonomicDriveController.xFeedbackOverride = null;
+    AdvancedPPHolonomicDriveController.xFeedbackOverride = null;
   }
 
   /**
@@ -181,7 +238,7 @@ public class PPHolonomicDriveController implements PathFollowingController {
    *     meters/sec
    */
   public static void overrideYFeedback(DoubleSupplier yFeedbackOverride) {
-    PPHolonomicDriveController.yFeedbackOverride = yFeedbackOverride;
+    AdvancedPPHolonomicDriveController.yFeedbackOverride = yFeedbackOverride;
   }
 
   /**
@@ -189,7 +246,43 @@ public class PPHolonomicDriveController implements PathFollowingController {
    * error.
    */
   public static void clearYFeedbackOverride() {
-    PPHolonomicDriveController.yFeedbackOverride = null;
+    AdvancedPPHolonomicDriveController.yFeedbackOverride = null;
+  }
+
+  /**
+   * Begin overriding the X axis feedback.
+   *
+   * @param xFeedbackOverride Double supplier that returns the desired FIELD-RELATIVE X feedback in
+   *     meters/sec
+   */
+  public static void overrideXFeedbackRobotRelative(DoubleSupplier xFeedbackOverride) {
+    AdvancedPPHolonomicDriveController.xFeedbackOverrideRobotRelative = xFeedbackOverride;
+  }
+
+  /**
+   * Stop overriding the X axis feedback, and return to calculating it based on path following
+   * error.
+   */
+  public static void clearXFeedbackOverrideRobotRelative() {
+    AdvancedPPHolonomicDriveController.xFeedbackOverrideRobotRelative = null;
+  }
+
+  /**
+   * Begin overriding the Y axis feedback.
+   *
+   * @param yFeedbackOverride Double supplier that returns the desired FIELD-RELATIVE Y feedback in
+   *     meters/sec
+   */
+  public static void overrideYFeedbackRobotRelative(DoubleSupplier yFeedbackOverride) {
+    AdvancedPPHolonomicDriveController.yFeedbackOverrideRobotRelative = yFeedbackOverride;
+  }
+
+  /**
+   * Stop overriding the Y axis feedback, and return to calculating it based on path following
+   * error.
+   */
+  public static void clearYFeedbackOverrideRobotRelative() {
+    AdvancedPPHolonomicDriveController.yFeedbackOverrideRobotRelative = null;
   }
 
   /**
@@ -222,7 +315,7 @@ public class PPHolonomicDriveController implements PathFollowingController {
    *     radians/sec
    */
   public static void overrideRotationFeedback(DoubleSupplier rotationFeedbackOverride) {
-    PPHolonomicDriveController.rotFeedbackOverride = rotationFeedbackOverride;
+    AdvancedPPHolonomicDriveController.rotFeedbackOverride = rotationFeedbackOverride;
   }
 
   /**
@@ -230,12 +323,24 @@ public class PPHolonomicDriveController implements PathFollowingController {
    * error.
    */
   public static void clearRotationFeedbackOverride() {
-    PPHolonomicDriveController.rotFeedbackOverride = null;
+    AdvancedPPHolonomicDriveController.rotFeedbackOverride = null;
   }
 
   /** Clear all feedback overrides and return to purely using path following error for feedback */
   public static void clearFeedbackOverrides() {
     clearXYFeedbackOverride();
     clearRotationFeedbackOverride();
+  }
+
+  public static void setXSetpointIncrement(DoubleSupplier xSetpointIncrement) {
+    AdvancedPPHolonomicDriveController.xSetpointIncrement = xSetpointIncrement;
+  }
+
+  public static void setYSetpointIncrement(DoubleSupplier ySetpointIncrement) {
+    AdvancedPPHolonomicDriveController.ySetpointIncrement = ySetpointIncrement;
+  }
+
+  public static void setRotSetpointIncrement(DoubleSupplier rotSetpointIncrement) {
+    AdvancedPPHolonomicDriveController.rotSetpointIncrement = rotSetpointIncrement;
   }
 }

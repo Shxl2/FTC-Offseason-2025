@@ -178,7 +178,7 @@ public class PPLibTelemetry {
         }
 
         File pathFile =
-            new File(Filesystem.getDeployDirectory(), "com/pathplanner/paths/" + name + ".path");
+            new File(Filesystem.getDeployDirectory(), "pathplanner/paths/" + name + ".path");
 
         try (FileWriter writer = new FileWriter(pathFile)) {
           writer.write(pathJson.toJSONString());
@@ -196,10 +196,10 @@ public class PPLibTelemetry {
 
   private static void handleAutoHotReloadEvent(NetworkTableEvent event) {
     if (!compMode) {
-      if (Robot.isEnabled()) {
-        RobotLog.w("Ignoring auto hot reload, robot is enabled", false);
-        return;
-      }
+//      if (DriverStation.isEnabled()) {
+//        DriverStation.reportWarning("Ignoring auto hot reload, robot is enabled", false);
+//        return;
+//      }
 
       try {
         String jsonStr = event.valueData.value.getString();
@@ -213,16 +213,19 @@ public class PPLibTelemetry {
             auto.hotReload(autoJson);
           }
         }
+
+
         File pathFile =
-            new File(Filesystem.getDeployDirectory(), "com/pathplanner/autos/" + name + ".auto");
+            new File(Filesystem.getDeployDirectory(), "pathplanner/autos/" + name + ".auto");
 
         try (FileWriter writer = new FileWriter(pathFile)) {
           writer.write(autoJson.toJSONString());
           writer.flush();
         } catch (IOException e) {
-          RobotLog.w(
-              "Failed to save updated auto file contents, please re-deploy code", false);
+//          DriverStation.reportWarning(
+//              "Failed to save updated auto file contents, please re-deploy code", false);
         }
+
       } catch (Exception e) {
         // Ignore
       }

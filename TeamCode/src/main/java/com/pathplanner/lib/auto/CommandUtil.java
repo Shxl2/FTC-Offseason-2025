@@ -7,11 +7,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -60,7 +58,6 @@ public class CommandUtil {
       case "parallel" -> parallelGroupFromData(data, loadChoreoPaths);
       case "race" -> raceGroupFromData(data, loadChoreoPaths);
       case "deadline" -> deadlineGroupFromData(data, loadChoreoPaths);
-      case "conditional" -> conditionalGroupFromData(data, loadChoreoPaths);
       default -> Commands.none();
     };
   }
@@ -131,28 +128,6 @@ public class CommandUtil {
         group.addCommands(commandFromJson((JSONObject) cmds.get(i), loadChoreoPaths));
       }
       return group;
-    } else {
-      return Commands.none();
-    }
-  }
-
-  private static Command conditionalGroupFromData(JSONObject dataJson, boolean loadChoreoPaths)
-          throws IOException, ParseException {
-    JSONObject onTrue = (JSONObject) dataJson.get("onTrue");
-    JSONObject onFalse = (JSONObject) dataJson.get("onFalse");
-
-    String namedConditional = (String) dataJson.get("namedConditional");
-
-    Command onTrueCmd;
-    Command onFalseCmd;
-    BooleanSupplier namedConditionalSupp;
-
-    if (!onTrue.isEmpty() || !onFalse.isEmpty() || !namedConditional.isEmpty()) {
-      onTrueCmd = commandFromJson(onTrue, loadChoreoPaths);
-      onFalseCmd = commandFromJson(onFalse, loadChoreoPaths);
-      namedConditionalSupp = NamedConditions.getCondition(namedConditional);
-
-      return new ConditionalCommand(onTrueCmd, onFalseCmd, namedConditionalSupp);
     } else {
       return Commands.none();
     }

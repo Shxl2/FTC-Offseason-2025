@@ -247,25 +247,44 @@ public class RobotConfig {
    * @throws IOException if an I/O error occurs
    * @throws ParseException if a JSON parsing error occurs
    */
-  public static RobotConfig fromGUISettings(HardwareMap hwMap) throws IOException, ParseException {
-    BufferedReader br =
-        new BufferedReader(
-                new InputStreamReader(
-                        hwMap.appContext
-                                .getAssets()
-                                .open("com/pathplanner/settings.json")));
+  public static RobotConfig fromGUISettings(HardwareMap hwMap) {
+      BufferedReader br =
+              null;
+      try {
+          br = new BufferedReader(
+                  new InputStreamReader(
+                          hwMap.appContext
+                                  .getAssets()
+                                  .open("pathplanner/settings.json")));
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
 
-    StringBuilder fileContentBuilder = new StringBuilder();
+      StringBuilder fileContentBuilder = new StringBuilder();
     String line;
-    while ((line = br.readLine()) != null) {
-      fileContentBuilder.append(line);
+    while (true) {
+        try {
+            if (!((line = br.readLine()) != null)) break;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        fileContentBuilder.append(line);
     }
-    br.close();
+      try {
+          br.close();
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
 
-    String fileContent = fileContentBuilder.toString();
-    JSONObject json = (JSONObject) new JSONParser().parse(fileContent);
+      String fileContent = fileContentBuilder.toString();
+      JSONObject json = null;
+      try {
+          json = (JSONObject) new JSONParser().parse(fileContent);
+      } catch (ParseException e) {
+          throw new RuntimeException(e);
+      }
 
-    boolean isHolonomic = (boolean) json.get("holonomicMode");
+      boolean isHolonomic = (boolean) json.get("holonomicMode");
     double massKG = ((Number) json.get("robotMass")).doubleValue();
     double MOI = ((Number) json.get("robotMOI")).doubleValue();
     double wheelRadius = ((Number) json.get("driveWheelRadius")).doubleValue();

@@ -21,4 +21,12 @@ public class DriveConstants {
 
     public static DriveGains driveGains = new DriveGains(0.5, 0, 0, 0.35, 6.4, 0);
     public static DriveConfig driveConfig = new DriveConfig(19.0, (104.0 / 2.0) * 0.001);
+
+    public static double HEADING_P = 2.5;
+    public static double HEADING_I = 0.0;
+    public static double HEADING_D = 0.0;
+
+    public static double TRANSLATION_P = 2.5;
+    public static double TRANSLATION_I = 0.0;
+    public static double TRANSLATION_D = 0.0;
 }

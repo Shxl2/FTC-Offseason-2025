@@ -37,6 +37,11 @@ public class DriveIOEncoders implements DriveIO {
         fL.setInverted(true);
         bL.setInverted(true);
 
+        fL.resetEncoder();
+        fR.resetEncoder();
+        bL.resetEncoder();
+        bR.resetEncoder();
+
         feedforward = new TunableSimpleMotorFeedforward(0, 0, 0);
 
         fLController = new PIDController(0, 0, 0);

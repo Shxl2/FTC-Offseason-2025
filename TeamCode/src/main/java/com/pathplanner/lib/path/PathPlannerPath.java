@@ -302,7 +302,7 @@ public class PathPlannerPath {
         new BufferedReader(
                 new FileReader(
                         new File(
-                                Filesystem.getDeployDirectory(), "com/pathplanner/paths/" + pathName + ".path")))) {
+                                Filesystem.getDeployDirectory(), "pathplanner/paths/" + pathName + ".path")))) {
       StringBuilder fileContentBuilder = new StringBuilder();
       String line;
       while ((line = br.readLine()) != null) {
@@ -644,8 +644,7 @@ public class PathPlannerPath {
       // The ideal starting state is known, generate the ideal trajectory
       Rotation2d heading = getInitialHeading();
       Translation2d fieldSpeeds = new Translation2d(idealStartingState.velocityMPS(), heading);
-      ChassisSpeeds startingSpeeds = new ChassisSpeeds(fieldSpeeds.getX(), fieldSpeeds.getY(), 0.0);
-      ChassisSpeeds.fromFieldRelativeSpeeds(startingSpeeds, idealStartingState.rotation());
+      ChassisSpeeds startingSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldSpeeds.getX(), fieldSpeeds.getY(), 0.0, idealStartingState.rotation());
       idealTrajectory =
           Optional.of(
               generateTrajectory(startingSpeeds, idealStartingState.rotation(), robotConfig));

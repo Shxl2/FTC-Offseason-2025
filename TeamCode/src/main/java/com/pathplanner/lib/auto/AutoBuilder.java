@@ -2,14 +2,16 @@ package com.pathplanner.lib.auto;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.pathplanner.lib.commands.*;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindThenFollowPath;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.FlippingUtil;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -75,8 +77,8 @@ public class AutoBuilder {
           BooleanSupplier shouldFlipPath,
           Subsystem... driveRequirements) {
     if (configured) {
-      RobotLog.e(
-              "Auto builder has already been configured. This is likely in error.", true);
+//      DriverStation.reportError(
+//              "Auto builder has already been configured. This is likely in error.", true);
     }
 
     AutoBuilder.pathFollowingCommandBuilder =
@@ -178,8 +180,8 @@ public class AutoBuilder {
           BooleanSupplier shouldFlipPose,
           boolean isHolonomic) {
     if (configured) {
-      RobotLog.e(
-              "Auto builder has already been configured. This is likely in error.", true);
+//      DriverStation.reportError(
+//              "Auto builder has already been configured. This is likely in error.", true);
     }
 
     AutoBuilder.pathFollowingCommandBuilder = pathFollowingCommandBuilder;
@@ -464,7 +466,7 @@ public class AutoBuilder {
    * @return List of all auto names
    */
   public static List<String> getAllAutoNames() {
-    File[] autoFiles = new File(Filesystem.getDeployDirectory(), "com/pathplanner/autos").listFiles();
+    File[] autoFiles = new File(Filesystem.getDeployDirectory(), "pathplanner/autos").listFiles();
 
     if (autoFiles == null) {
       return new ArrayList<>();
