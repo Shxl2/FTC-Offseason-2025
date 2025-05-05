@@ -22,7 +22,7 @@ public class Drive extends SubsystemBase {
     private final LocalizerIO localizer;
 
     private final DriveIO.DriveIOInputs driveInputs = new DriveIO.DriveIOInputs("Drive/Motors");
-    private final LocalizerIO.LocalizerIOInputs localizerInputs = new LocalizerIO.LocalizerIOInputs();
+    private final LocalizerIO.LocalizerIOInputs localizerInputs = new LocalizerIO.LocalizerIOInputs("Drive/Localizer");
 
     private final MecanumDriveKinematics kinematics;
     private final MecanumDrivePoseEstimator poseEstimator;
@@ -82,7 +82,7 @@ public class Drive extends SubsystemBase {
         driveInputs.logValues();
 
         localizer.updateInputs(localizerInputs);
-        localizerInputs.logValues("Drive/Localizer");
+        localizerInputs.logValues();
 
         poseEstimator.updateWithTime(timer.get(), localizerInputs.pose.getRotation(), driveInputs.wheelPositions);
 

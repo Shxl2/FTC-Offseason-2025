@@ -26,7 +26,7 @@ public interface DriveIO {
         private DoubleArrayPublisher currentsTable;
 
         public DriveIOInputs(String tableName) {
-            table = NetworkTableInstance.getDefault().getTable("Drive/Localizer");
+            table = NetworkTableInstance.getDefault().getTable(tableName);
             wheelPositionsTable = table.getStructTopic("WheelPositions", MecanumDriveWheelPositions.struct).publish();
 
             desiredWheelSpeedsTable = table.getStructTopic("DesiredWheelSpeeds", MecanumDriveWheelSpeeds.struct).publish();

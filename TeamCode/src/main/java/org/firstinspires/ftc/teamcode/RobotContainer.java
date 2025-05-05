@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
 import org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.subsystems.drive.DriveIOEncoders;
 import org.firstinspires.ftc.teamcode.subsystems.drive.localizer.LocalizerIO;
+import org.firstinspires.ftc.teamcode.subsystems.drive.localizer.LocalizerIOPinpoint;
 import org.firstinspires.ftc.teamcode.subsystems.vision.Vision;
 import org.firstinspires.ftc.teamcode.subsystems.vision.VisionIOLimelight3A;
 
@@ -23,7 +24,7 @@ public class RobotContainer {
     private final CommandGamepad operatorController;
 
     public RobotContainer(HardwareMap hwMap, Telemetry telemetry, Gamepad gamepad1, Gamepad gamepad2, int autoNum) {
-        drive = new Drive(new DriveIOEncoders(hwMap, DriveConstants.driveConfig), new LocalizerIO() {}, DriveConstants.driveGains);
+        drive = new Drive(new DriveIOEncoders(hwMap, DriveConstants.driveConfig), new LocalizerIOPinpoint(hwMap), DriveConstants.driveGains);
         vision = new Vision(drive::addVisionMeasurement, new VisionIOLimelight3A(hwMap));
 
         driverController = new CommandGamepad(gamepad1);

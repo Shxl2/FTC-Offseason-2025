@@ -12,7 +12,7 @@
             <goBILDA5202SeriesMotor name="FL" port="0"/>-->
             <goBILDA5202SeriesMotor name="BL" port="1"/>-->
 
-            <ControlHubImuBHI260AP name="imu" port="0" bus="0"/>
+            <goBILDAPinpoint name="pinpoint" port="0" bus="0"/>
 
         </LynxModule>
         <LynxModule name="Expansion Hub 1" port="1">
