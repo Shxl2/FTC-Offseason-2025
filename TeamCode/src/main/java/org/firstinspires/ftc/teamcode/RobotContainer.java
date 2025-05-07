@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.localization.Pose;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -8,9 +9,10 @@ import org.firstinspires.ftc.teamcode.commands.AutoCommands;
 import org.firstinspires.ftc.teamcode.commands.DriveCommands;
 import org.firstinspires.ftc.teamcode.lib.wpilib.CommandGamepad;
 import org.firstinspires.ftc.teamcode.subsystems.drive.Drive;
-import org.firstinspires.ftc.teamcode.subsystems.vision.Vision;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 
 public class RobotContainer {
     private final Drive drive;
@@ -42,13 +44,15 @@ public class RobotContainer {
     }
 
     public void configureButtonBindings() {
+        driverController.a().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(), () -> Math.toRadians(90)));
     }
 
-    public void getAutoCommand(int chooser) {
+    public Command getAutoCommand(int chooser) {
         switch (chooser) {
             case 1:
-                drive.setDefaultCommand(AutoCommands.followPath(drive, AutoCommands.sampleAutoPath(drive)));
-                break;
+                return AutoCommands.bucketAuto(drive);
         }
+        return Commands.none();
     }
 }

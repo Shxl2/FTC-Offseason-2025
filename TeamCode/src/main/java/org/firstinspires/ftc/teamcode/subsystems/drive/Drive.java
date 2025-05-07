@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.subsystems.drive;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.localization.Pose;
 import com.pedropathing.localization.localizers.OTOSLocalizer;
 import com.pedropathing.pathgen.PathBuilder;
 import com.pedropathing.pathgen.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.commands.auto.PoseStorage;
 import org.firstinspires.ftc.teamcode.subsystems.drive.localizer.LimelightLocalizerOTOS;
+
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,6 +26,7 @@ public class Drive extends SubsystemBase {
     public Drive(HardwareMap hwMap, Telemetry telemetry) {
         drive = new Follower(hwMap, DriveConstants.FConstants.class, DriveConstants.LConstants.class);
 
+        drive.setPose(PoseStorage.currentPose);
 //        drive.initialize(new LimelightLocalizerOTOS(hwMap));
         this.telemetry = telemetry;
     }
@@ -42,6 +47,22 @@ public class Drive extends SubsystemBase {
         drive.setTeleOpMovementVectors(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, true);
     }
 
+    public void setPose(Pose pose) {
+        drive.setPose(pose);
+    }
+
+    public void startTeleopDrive() {
+        drive.startTeleopDrive();
+    }
+
+    public void drive(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotationSupplier) {
+        drive.setTeleOpMovementVectors(xSupplier.getAsDouble(), ySupplier.getAsDouble(), rotationSupplier.getAsDouble(), false);
+    }
+
+    public Pose getPedroPose() {
+        return drive.getPose();
+    }
+
     public Pose2d getPose() {
         return new Pose2d(new Translation2d(drive.getPose().getX(), drive.getPose().getY()), new Rotation2d(drive.getPose().getHeading()));
     }
@@ -59,7 +80,7 @@ public class Drive extends SubsystemBase {
     }
 
     public void followPath(PathChain path) {
-        drive.followPath(path, false);
+        drive.followPath(path, true);
     }
 
     public boolean isFinished() {
