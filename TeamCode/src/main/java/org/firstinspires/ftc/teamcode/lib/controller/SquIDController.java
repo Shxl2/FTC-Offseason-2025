@@ -13,7 +13,7 @@ public class SquIDController {
         this.squP = squP;
     }
 
-    public double calculate(double setpoint, double measurement) {
+    public double calculate(double squP, double setpoint, double measurement) {
         double error;
         if (continuous) {
             double errorBound = (maximumInput - minimumInput) / 2.0;
@@ -23,6 +23,10 @@ public class SquIDController {
         }
 
         return squP * Math.sqrt(Math.abs(error)) * Math.signum(error);
+    }
+
+    public double calculate(double setpoint, double measurement) {
+        return calculate(squP, setpoint, measurement);
     }
 
     public void enableContinuousInput(double minimumInput, double maximumInput) {

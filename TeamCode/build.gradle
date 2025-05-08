@@ -15,7 +15,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2025.1.1-beta-1"
     id 'edu.wpi.first.WpilibTools' version '1.3.0'
 
-    id "com.diffplug.spotless" version "6.12.0"
+    id "com.diffplug.spotless" version "6.25.0"
 }
 
 wpi.maven.useLocal = false
@@ -48,7 +48,6 @@ dependencies {
     implementation wpilibTools.deps.wpilibJava("wpimath")
     implementation wpilibTools.deps.wpilibJava("wpiunits")
     implementation wpilibTools.deps.wpilibJava("wpinet")
-    implementation wpilibTools.deps.wpilibJava("ntcore")
 
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
@@ -62,56 +61,4 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
     implementation group: "us.hebi.quickbuf", name: "quickbuf-runtime", version: wpi.versions.quickbufVersion.get();
-}
-
-tasks.register('PullWPILibLibraries') {
-    def f = file('src/main/jniLibs/arm64-v8a/libraries.zip')
-
-    new URL('https://github.com/RisingNinjas-16391/wpilib_android/releases/latest/download/libraries.zip').withInputStream{ i -> f.withOutputStream{ it << i }}
-
-    copy {
-        from zipTree(f)
-        into 'src/main/jniLibs/arm64-v8a'
-    }
-}
-
-// Spotless formatting
-spotless {
-    java {
-        target fileTree(".") {
-            include "**/*.java"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        toggleOffOn()
-        googleJavaFormat()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-    groovyGradle {
-        target fileTree(".") {
-            include "**/*.gradle"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        greclipse()
-        indentWithSpaces(4)
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-    json {
-        target fileTree(".") {
-            include "**/*.json"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        gson().indentWithSpaces(2)
-    }
-    format "misc", {
-        target fileTree(".") {
-            include "**/*.md", "**/.gitignore"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        trimTrailingWhitespace()
-        indentWithSpaces(2)
-        endWithNewline()
-    }
 }

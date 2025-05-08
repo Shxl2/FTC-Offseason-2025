@@ -26,9 +26,10 @@ public class TeleOp extends CommandOpMode {
     @Override
     public void robotPeriodic() {
         super.robotPeriodic();
+        robotTelemetry.addData("Loop Time", 1.0 / (timer.get() - previousTime));
+
         robotTelemetry.update();
 
-        robotTelemetry.addData("Loop Time", 1.0 / (timer.get() - previousTime));
 
         previousTime = timer.get();
 

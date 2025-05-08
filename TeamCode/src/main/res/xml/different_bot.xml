@@ -1,0 +1,13 @@
+<Robot type="FirstInspires-FTC">
+    <!-- Config for main 2024 Robot -->
+    <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
+        <LynxModule name="Control Hub" port="173">
+;
+        </LynxModule>
+        <LynxModule name="Expansion Hub 1" port="1">
+
+            <goBILDA5202SeriesMotor name="liftTop" port="0"/>
+            <goBILDA5202SeriesMotor name="liftBottom" port="1"/>
+        </LynxModule>
+    </LynxUsbDevice>
+</Robot>

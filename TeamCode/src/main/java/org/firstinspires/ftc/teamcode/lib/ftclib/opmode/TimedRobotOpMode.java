@@ -4,8 +4,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
-
 // An OpMode that is has methods similar to WPILib's Robot class
 public abstract class TimedRobotOpMode extends OpMode {
     @Override
