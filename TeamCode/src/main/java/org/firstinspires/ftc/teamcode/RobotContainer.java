@@ -47,8 +47,7 @@ public class RobotContainer {
     }
 
     public void configureButtonBindings() {
-//        driverController.a().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -driverController.getLeftY(),
-//                () -> -driverController.getLeftX(), () -> Math.toRadians(90)));
+        driverController.a().whileTrue(Elevator.setPosition(elevator, () -> 200));
     }
 
     public Command getAutoCommand(int chooser) {
